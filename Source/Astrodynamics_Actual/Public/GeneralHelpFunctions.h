@@ -48,7 +48,7 @@ public:
 	static TArray<FVector> GenerateSplineRing(float OrbitRadius, float OrbitTilt, float OrbitEllipse, int Complexity);
 
 	UFUNCTION(BlueprintPure,category="astrophysics|functions")
-	static FVector ForceAonB(const int MassPrimary, const int MassSecondary, const AActor* Primary, const AActor* Secondary);
+	static FVector ForceAonB(const double MassPrimary, const double MassSecondary, const AActor* Primary, const AActor* Secondary);
 
 	/*quick sorting of TArray<physics_applicable_planet_base> for binary searching, notably in mission level*/
 	//UFUNCTION(BlueprintCallable, BlueprintPure, category = "macros|functions")

@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SplineComponent.h"
+#include "LoadedValuesStruct.h"
 #include "physics_applicable_planet_base.generated.h"
 
 UCLASS(Blueprintable)
@@ -29,6 +30,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	float distance;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+		FLoadedValuesStruct Data;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		UStaticMeshComponent* SphereMesh;

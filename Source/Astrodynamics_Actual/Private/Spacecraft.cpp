@@ -55,7 +55,41 @@ void ASpacecraft::BatteryPercentage(float& percent)
 	percent = BatteryCurrent / BatteryCapacity;
 }
 
-void ASpacecraft::RocketEquation(const float& SpecificImpulse,const float& InitialMass,const float& FinalMass,float& Velocity)
+void ASpacecraft::OrbitInitialForce(const FVector RadiusToPlanet, FVector& PerpendicularOrbit)
+{
+	if (!RadiusToPlanet.IsZero())
+	{
+		//Radius Vector is not zero!
+		//VectorNormalize(RadiusToPlanet);
+		//FVector normal = FVector::CrossProduct(RadiusToPlanet, FVector::ForwardVector); //UE uses left hand coordinate system, so forward vector = (1,0,0) which is i
+		//VectorNormalize(normal);
+		/*if (FVector::Orthogonal(RadiusToPlanet, normal))
+		{
+			PerpendicularOrbit = normal;
+		};*/
+
+	}
+}
+
+float ASpacecraft::StandardGravParam(const float& PrimaryMass, const float& SecondaryMass)
+{
+	return float (GravityConstant * ((PrimaryMass * pow(10, 24)) + (SecondaryMass * pow(10, 24)))) / 1000;
+}
+
+void ASpacecraft::SemiImplicitEuler(const float DeltaSeconds, const AActor* Spacecraft, const TArray<Aphysics_applicable_planet_base*> Bodies)
+{
+	for (Aphysics_applicable_planet_base* Body : Bodies)
+	{
+		double R = Spacecraft->GetDistanceTo(Body);
+		FVector Direction = Body->GetActorLocation() - Spacecraft->GetActorLocation();
+		double mass = Body->Data.Mass * pow(10, 24);
+		FVector Force = UGeneralHelpFunctions::ForceAonB(mass, 1, Body, Spacecraft) * DeltaSeconds; //  || test this to see if you need to multiply by delta seconds to get accurate timesteps
+		UPrimitiveComponent* Baseplate = Spacecraft->GetComponentByClass<UPrimitiveComponent>();
+		Baseplate->AddForce(Force);
+	};
+}
+
+void ASpacecraft::RocketEquation(const float& SpecificImpulse,const float& InitialMass,const float& FinalMass, float& Velocity)
 {
 	Velocity = SpecificImpulse * 9.8 * log(InitialMass / FinalMass);
 }
@@ -75,7 +109,7 @@ void ASpacecraft::Hohmann(
 	float& TotalDeltaV)
 {
 	// Standard Gravity Parameter that sees use throughout, simple one liner gets the job done
-	float StandardGravitationalParameter = (GravityConstant * ((PrimaryMassActual * pow(10, 24)) + (SecondaryMassActual * pow(10, 24)))) / 1000; 
+	double StandardGravitationalParameter = StandardGravParam(PrimaryMassActual,SecondaryMassActual); 
 	//divided by 1000 to convert from m**3/s**2 to km**3/s**2
 
 	float ParkedVel = VisViva(PrimaryOrbitRadius, PrimaryOrbitRadius, StandardGravitationalParameter);
@@ -102,7 +136,7 @@ void ASpacecraft::BiElliptic(
 	float& DeltaV1, float& DeltaV2, float& DeltaV3, float& DeltaVT)
 {
 	// quick shorthand for standard grav param, pre-calced values exist, but it's quicker to just do the math here and now then go looking them up for each planet/moon/etc
-	float StandardGravitationalParameter = (GravityConstant * ((PrimaryMassActual * pow(10, 24)) + (SecondaryMassActual * pow(10, 24)))) / 1000;
+	float StandardGravitationalParameter = StandardGravParam(PrimaryMassActual,SecondaryMassActual);
 
 	TransferSemiMjrAxs1 = ((TargetOrbitRadius * transferMagnitude) + InitialOrbitRadius) / 2;
 

@@ -14,12 +14,12 @@ USTRUCT(BlueprintType, category = "initials")
 struct ASTRODYNAMICS_ACTUAL_API FLoadedValuesStruct
 {
 	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FVector WorldPos;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString Name;
+		FText Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FText BodyType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UMaterialInstance* SurfaceTexture;
@@ -37,6 +37,9 @@ struct ASTRODYNAMICS_ACTUAL_API FLoadedValuesStruct
 		float ERelRadius;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FVector WorldPos;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TArray<FVector> SplineMap;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -49,7 +52,8 @@ struct ASTRODYNAMICS_ACTUAL_API FLoadedValuesStruct
 	FLoadedValuesStruct() 
 	{
 		WorldPos = FVector::ZeroVector;
-		Name = NULL;
+		Name = FText::FromString("NULL");
+		BodyType = FText::FromString("NULL");
 		SurfaceTexture = NULL;
 		Mass = 0.0;
 		ERelMass = 0.0;

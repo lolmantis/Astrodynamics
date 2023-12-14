@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GeneralHelpFunctions.h"
 #include <cmath>
+#include "Math/Vector.h"
 #include "GameFramework/Actor.h"
 #include "Spacecraft.generated.h"
 
@@ -38,19 +40,28 @@ protected:
 		const TArray<FName>& IN_gyros
 	);
 
-	UFUNCTION(BlueprintPure, BlueprintCallable, category = "spacecraft | functions")
+	UFUNCTION(BlueprintPure, category = "spacecraft | functions")
 		void FuelPercentage(float& percent);
 
-	UFUNCTION(BlueprintPure, BlueprintCallable, category = "spacecraft | functions")
+	UFUNCTION(BlueprintPure, category = "spacecraft | functions")
 		void BatteryPercentage(float& percent);
+
+	UFUNCTION(BlueprintPure, category = "spacecraft | astrophysics | functions")
+		void OrbitInitialForce(const FVector RadiusToPlanet, FVector& PerpendicularOrbit);
+
+	UFUNCTION(BlueprintPure, category = "spaceacraft | astrophysics | functions")
+		float StandardGravParam(const float& PrimaryMass, const float& SecondaryMass);
+
+	UFUNCTION(BlueprintCallable, category = "spacecraft | astrophysics | functions")
+		void SemiImplicitEuler(const float DeltaSeconds, const AActor* Spacecraft, const TArray<Aphysics_applicable_planet_base*> Bodies);
 
 	// calculates Delta V for a given maneuver, or can be used for the full deltaV budget
 	UFUNCTION(BlueprintCallable, category = "spacecraft | astrophysics | functions")
 		void RocketEquation(const float& SpecificImpulse, const float& InitialMass,const float& FinalMass, float& velocity);
 
 	// calculates velocity of a given orbit, very useful in getting Delta V for Hohmann maneuvers
-	UFUNCTION(BlueprintCallable, category = "spacecraft | astrophysics | functions")
-	float VisViva(const float& RadiusFromPrimary, const float& OrbitSemiMajorAxis, const float& StandardGravitationalParameter);
+	UFUNCTION(BlueprintPure, category = "spacecraft | astrophysics | functions")
+		float VisViva(const float& RadiusFromPrimary, const float& OrbitSemiMajorAxis, const float& StandardGravitationalParameter);
 
 	/* calculates delta V required for a given hohmann transfer, also provides:
 	* semi major axis of transfer orbit, periapsis velocity, apoapsis velocity
@@ -65,22 +76,29 @@ protected:
 			float& FirstDeltaV, float& FinalDeltaV,
 			float& TotalDeltaV
 		);
+		/*
+		* a hohmann transfer between two orbits (they need to be circular and co-planar, though)
+		*/
 
 	UFUNCTION(BlueprintCallable, category = "spacecraft | astrophysics | functions")
-	void BiElliptic(
-		const int32& InitialOrbitRadius, const int32& TargetOrbitRadius, const int32& transferMagnitude,
-		const float& PrimaryMassActual, const float& SecondaryMassActual,
-		float& ApogeeRad, float& TransferApogee1, float& TransferApogee2,
-		float& TransferSemiMjrAxs1, float& TransferSemiMjrAxs2,
-		float& DeltaV1, float& DeltaV2, float& DeltaV3, float& DeltaVT);
+		void BiElliptic(
+			const int32& InitialOrbitRadius, const int32& TargetOrbitRadius, const int32& transferMagnitude,
+			const float& PrimaryMassActual, const float& SecondaryMassActual,
+			float& ApogeeRad, float& TransferApogee1, float& TransferApogee2,
+			float& TransferSemiMjrAxs1, float& TransferSemiMjrAxs2,
+			float& DeltaV1, float& DeltaV2, float& DeltaV3, float& DeltaVT
+		);
+	/*
+	* a bielliptical transfer between two orbits, same conditions as a hohmann
+	*/
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, category = "spacecraft | astrophysics | functions")
-	void HohmannMoreEfficient(const float InitialOrbitRadius, const float FinalOrbitRadius, const float Apoapsis,
-		bool& bHohmannEfficient, float& BiEllipticPreference);
+		void HohmannMoreEfficient(const float InitialOrbitRadius, const float FinalOrbitRadius, const float Apoapsis,
+			bool& bHohmannEfficient, float& BiEllipticPreference);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "spacecraft | variables")
 		FString Name;

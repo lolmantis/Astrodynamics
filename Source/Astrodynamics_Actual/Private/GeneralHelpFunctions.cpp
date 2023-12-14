@@ -76,7 +76,7 @@ TArray<FVector> UGeneralHelpFunctions::GenerateSplineRing(float OrbitRadius, flo
 	return SplinePoints;
 }
 
-FVector UGeneralHelpFunctions::ForceAonB(const int MassA, const int MassB, const AActor* A, const AActor* B)
+FVector UGeneralHelpFunctions::ForceAonB(const double MassA, const double MassB, const AActor* A, const AActor* B)
 {
 	float distance = A->GetDistanceTo(B);
 	// make sure the world-scale is true to life, I don't really care how you do it
@@ -86,8 +86,10 @@ FVector UGeneralHelpFunctions::ForceAonB(const int MassA, const int MassB, const
 	// returns the unit vector pointing between the two
 	
 	float force = ((static_cast<float>(MassA) * static_cast<float>(MassB)) / (distance * distance)) * 6.6743e-11f;
-	// note that force is directionless at this point
-
+	/* note that force is directionless at this point,
+	*  quick explanation for why it's distance squared and not distance cubed given we're multiplying by radius again;
+	*  we're using the unit vector which has a |magnitude| of 1, which doesn't affect the calculation
+	*/
 	return VectDirect * force;
 	// scales unit vector pointing from B to A up to the force required
 	
