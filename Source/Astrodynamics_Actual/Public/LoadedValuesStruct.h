@@ -43,7 +43,7 @@ struct ASTRODYNAMICS_ACTUAL_API FLoadedValuesStruct
 		TArray<FVector> SplineMap;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		FString CentralStar;
+		int CentralStar;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bIsMoon;
@@ -60,7 +60,7 @@ struct ASTRODYNAMICS_ACTUAL_API FLoadedValuesStruct
 		Radius = 1;
 		ERelRadius = 1.0;
 		SplineMap;
-		CentralStar = NULL;
+		CentralStar = 0;
 		bIsMoon = false;
 	}
 };

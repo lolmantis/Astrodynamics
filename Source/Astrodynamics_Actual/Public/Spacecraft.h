@@ -6,6 +6,7 @@
 #include "GeneralHelpFunctions.h"
 #include <cmath>
 #include "Math/Vector.h"
+#include "physics_applicable_planet_base.h"
 #include "GameFramework/Actor.h"
 #include "Spacecraft.generated.h"
 
@@ -47,13 +48,13 @@ protected:
 		void BatteryPercentage(float& percent);
 
 	UFUNCTION(BlueprintPure, category = "spacecraft | astrophysics | functions")
-		void OrbitInitialForce(const FVector RadiusToPlanet, FVector& PerpendicularOrbit);
+		void OrbitInitialForce(const FVector RadiusToPlanetCenter, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector);
 
 	UFUNCTION(BlueprintPure, category = "spaceacraft | astrophysics | functions")
 		float StandardGravParam(const float& PrimaryMass, const float& SecondaryMass);
 
 	UFUNCTION(BlueprintCallable, category = "spacecraft | astrophysics | functions")
-		void SemiImplicitEuler(const float DeltaSeconds, const AActor* Spacecraft, const TArray<Aphysics_applicable_planet_base*> Bodies);
+		void SemiImplicitEuler(const float DeltaSeconds, const AActor* Spacecraft, const TArray<Aphysics_applicable_planet_base*> Bodies, FVector& Force);
 
 	// calculates Delta V for a given maneuver, or can be used for the full deltaV budget
 	UFUNCTION(BlueprintCallable, category = "spacecraft | astrophysics | functions")

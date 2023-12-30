@@ -4,6 +4,7 @@
 
 
 #include "CoreMinimal.h"
+#include "GeneralHelpFunctions.h"
 #include "GameFramework/Actor.h"
 #include "Components/SplineComponent.h"
 #include "LoadedValuesStruct.h"
@@ -45,6 +46,12 @@ public:
 	/** Sets sphere material*/
 	UFUNCTION(BlueprintCallable)
 		bool setMaterial(UMaterialInstance* texture);
+
+	UFUNCTION(BlueprintPure,category="planets | astrophysics | functions")
+		void OrbitInitialForce(const float RadiusToPlanetCenter, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector);
+
+	UFUNCTION(BlueprintCallable, category = "spacecraft | astrophysics | functions")
+		void SemiImplicitEuler(const float DeltaSeconds, const TArray<Aphysics_applicable_planet_base*> Bodies);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float OrbitSpeed;

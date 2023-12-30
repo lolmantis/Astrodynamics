@@ -55,38 +55,34 @@ void ASpacecraft::BatteryPercentage(float& percent)
 	percent = BatteryCurrent / BatteryCapacity;
 }
 
-void ASpacecraft::OrbitInitialForce(const FVector RadiusToPlanet, FVector& PerpendicularOrbit)
-{
-	if (!RadiusToPlanet.IsZero())
+void ASpacecraft::OrbitInitialForce(const FVector RadiusToPlanetCenter, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector)
 	{
-		//Radius Vector is not zero!
-		//VectorNormalize(RadiusToPlanet);
-		//FVector normal = FVector::CrossProduct(RadiusToPlanet, FVector::ForwardVector); //UE uses left hand coordinate system, so forward vector = (1,0,0) which is i
-		//VectorNormalize(normal);
-		/*if (FVector::Orthogonal(RadiusToPlanet, normal))
-		{
-			PerpendicularOrbit = normal;
-		};*/
-
-	}
+	double mass = PlanetMass * pow(10, 24); //noting that radius to planet is the CENTER of the planet
+	double GM = GravityConstant * mass;
+	double radius = RadiusToPlanetCenter.Length();
+	double vel = FMath::Sqrt(GM / radius);
+	FVector directionNormalised = OrbitDirection.GetSafeNormal();
+	ForceVector = directionNormalised * vel;
 }
 
 float ASpacecraft::StandardGravParam(const float& PrimaryMass, const float& SecondaryMass)
 {
-	return float (GravityConstant * ((PrimaryMass * pow(10, 24)) + (SecondaryMass * pow(10, 24)))) / 1000;
+	return float ((GravityConstant * ((PrimaryMass * pow(10, 24)) + (SecondaryMass * pow(10, 24)))) / 1000);
 }
 
-void ASpacecraft::SemiImplicitEuler(const float DeltaSeconds, const AActor* Spacecraft, const TArray<Aphysics_applicable_planet_base*> Bodies)
+void ASpacecraft::SemiImplicitEuler(const float DeltaSeconds, const AActor* Spacecraft, const TArray<Aphysics_applicable_planet_base*> Bodies, FVector& Force)
 {
+	UPrimitiveComponent* Baseplate = Spacecraft->GetComponentByClass<UPrimitiveComponent>();
 	for (Aphysics_applicable_planet_base* Body : Bodies)
 	{
-		double R = Spacecraft->GetDistanceTo(Body);
-		FVector Direction = Body->GetActorLocation() - Spacecraft->GetActorLocation();
 		double mass = Body->Data.Mass * pow(10, 24);
-		FVector Force = UGeneralHelpFunctions::ForceAonB(mass, 1, Body, Spacecraft) * DeltaSeconds; //  || test this to see if you need to multiply by delta seconds to get accurate timesteps
-		UPrimitiveComponent* Baseplate = Spacecraft->GetComponentByClass<UPrimitiveComponent>();
-		Baseplate->AddForce(Force);
+		FVector TempForce = UGeneralHelpFunctions::ForceAonB(mass, 1, Body, Spacecraft) * DeltaSeconds; //  || test this to see if you need to multiply by delta seconds to get accurate timesteps
+		Baseplate->AddImpulse(TempForce, NAME_None, true);
+		Force += TempForce;
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TempForce.ToString());
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, Force.ToString());
 	};
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Force.ToString());
 }
 
 void ASpacecraft::RocketEquation(const float& SpecificImpulse,const float& InitialMass,const float& FinalMass, float& Velocity)
@@ -97,7 +93,7 @@ void ASpacecraft::RocketEquation(const float& SpecificImpulse,const float& Initi
 float ASpacecraft::VisViva(const float& RadiusFromPrimary, const float& OrbitSemiMajorAxis, const float& StandardGravitationalParameter)
 {
 	float velocity = sqrt(StandardGravitationalParameter * ((2 / RadiusFromPrimary) - (1 / OrbitSemiMajorAxis)));
-	return velocity;
+	return velocity; // equation relating velocity, gravity, and distance, it comes in handy just about everywhere physics related
 }
 
 void ASpacecraft::Hohmann(
@@ -190,6 +186,6 @@ void ASpacecraft::HohmannMoreEfficient(const float InitialOrbitRadius, const flo
 		bHohmannEfficient = false;
 	};
 	BiEllipticPreference = Apoapsis / InitialOrbitRadius;
-	
+
 	//return false;
-}
+};

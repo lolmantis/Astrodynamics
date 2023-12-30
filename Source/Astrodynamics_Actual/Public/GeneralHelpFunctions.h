@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Containers/Array.h"
-#include <physics_applicable_planet_base.h>
+//#include <physics_applicable_planet_base.h>
 #include "Math/UnrealMathUtility.h"
 #include "GeneralHelpFunctions.generated.h"
 
@@ -43,6 +43,10 @@ public:
 	static void RotateSpringArm(const APlayerController* controller, const FRotator currentrot,
 		FRotator& ArmWorldRotation
 		);
+
+	/*returns the period of a given orbit in years as standard, you'll have to convert to days later down the line if needed*/
+	UFUNCTION(BlueprintCallable, BlueprintPure, category="astrophysics|functions")
+	static double KeplerThirdLaw(const float SemiMajorAxisAU, const float CentralBodyMass);
 
 	UFUNCTION(BlueprintPure,category="macros|functions")
 	static TArray<FVector> GenerateSplineRing(float OrbitRadius, float OrbitTilt, float OrbitEllipse, int Complexity);

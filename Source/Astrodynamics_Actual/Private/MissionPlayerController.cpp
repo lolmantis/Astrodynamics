@@ -97,4 +97,4 @@ void AMissionPlayerController::SnapMouseToCenter(const APlayerController* Player
 			}
 		}
 	}
-}
+};

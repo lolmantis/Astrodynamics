@@ -76,3 +76,24 @@ bool Aphysics_applicable_planet_base::setMaterial(UMaterialInstance* surface_tex
 	}
 	return false;
 }
+void Aphysics_applicable_planet_base::OrbitInitialForce(const float RadiusToPlanetCenter, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector)
+{
+	double mass = PlanetMass * pow(10, 24); //noting that radius to planet is the CENTER of the planet
+	double GM = 6.6743e-11f * mass; // gravity constant as literal value, we don't need to define it as a constant because spacecraft already does that
+	double radius = RadiusToPlanetCenter;
+	double vel = FMath::Sqrt(GM / radius);
+	FVector directionNormalised = OrbitDirection.GetSafeNormal();
+	ForceVector = directionNormalised * vel;
+}
+void Aphysics_applicable_planet_base::SemiImplicitEuler(const float DeltaSeconds, const TArray<Aphysics_applicable_planet_base*> Bodies)
+{
+	for (Aphysics_applicable_planet_base* Body : Bodies)
+	{
+		double R = GetDistanceTo(Body);
+		FVector Direction = Body->GetActorLocation() - GetActorLocation();
+		double mass = Body->Data.Mass * pow(10, 24);
+		FVector Force = UGeneralHelpFunctions::ForceAonB(mass, 1, Body, this) * DeltaSeconds; //  || test this to see if you need to multiply by delta seconds to get accurate timesteps
+		UPrimitiveComponent* Baseplate = GetComponentByClass<UPrimitiveComponent>();
+		Baseplate->AddImpulse(Force, NAME_None, true);
+	};
+};
