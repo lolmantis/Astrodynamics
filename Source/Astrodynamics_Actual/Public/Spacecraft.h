@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GeneralHelpFunctions.h"
-#include <cmath>
 #include "Math/Vector.h"
 #include "physics_applicable_planet_base.h"
 #include "GameFramework/Actor.h"
@@ -22,6 +21,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UPrimitiveComponent* Baseplate;
 
 	UPROPERTY(BlueprintReadOnly, category = "spacecraft | astrophysics | variables")
 	float GravityConstant = 6.6743e-11f;
@@ -48,13 +49,13 @@ protected:
 		void BatteryPercentage(float& percent);
 
 	UFUNCTION(BlueprintPure, category = "spacecraft | astrophysics | functions")
-		void OrbitInitialForce(const FVector RadiusToPlanetCenter, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector);
+		void OrbitInitialForce(const float OrbitRadiusMeters, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector);
 
 	UFUNCTION(BlueprintPure, category = "spaceacraft | astrophysics | functions")
 		float StandardGravParam(const float& PrimaryMass, const float& SecondaryMass);
 
 	UFUNCTION(BlueprintCallable, category = "spacecraft | astrophysics | functions")
-		void SemiImplicitEuler(const float DeltaSeconds, const AActor* Spacecraft, const TArray<Aphysics_applicable_planet_base*> Bodies, FVector& Force);
+		void SemiImplicitEuler(const float DeltaSeconds, const TArray<Aphysics_applicable_planet_base*> Bodies, FVector& Force);
 
 	// calculates Delta V for a given maneuver, or can be used for the full deltaV budget
 	UFUNCTION(BlueprintCallable, category = "spacecraft | astrophysics | functions")
@@ -62,6 +63,7 @@ protected:
 
 	// calculates velocity of a given orbit, very useful in getting Delta V for Hohmann maneuvers
 	UFUNCTION(BlueprintPure, category = "spacecraft | astrophysics | functions")
+	UPARAM(DisplayName="force in m/s")
 		float VisViva(const float& RadiusFromPrimary, const float& OrbitSemiMajorAxis, const float& StandardGravitationalParameter);
 
 	/* calculates delta V required for a given hohmann transfer, also provides:
@@ -100,6 +102,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, category = "spacecraft | astrophysics | functions")
 		void HohmannMoreEfficient(const float InitialOrbitRadius, const float FinalOrbitRadius, const float Apoapsis,
 			bool& bHohmannEfficient, float& BiEllipticPreference);
+
+
+	UFUNCTION(BlueprintPure, category = "spacecraft | functions")
+	UPARAM(DisplayName="All components")
+		TArray<FName> ArrayAllComponents(FName NHull, TArray<FName> NThrusters, TArray<FName> NReactors, TArray<FName> NReactionWheels, TArray<FName> NGyroscopes);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = "spacecraft | variables")
 		FString Name;

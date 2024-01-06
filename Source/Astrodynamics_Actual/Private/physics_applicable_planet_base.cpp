@@ -2,34 +2,37 @@
 
 
 #include "physics_applicable_planet_base.h"
-#include "Components/SplineComponent.h"
+//#include "Components/SplineComponent.h"
 
 // Sets default values
 Aphysics_applicable_planet_base::Aphysics_applicable_planet_base()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	//manually defining root component to avoid nullptr
-	RootComp = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComp"));
+	RootComp = CreateDefaultSubobject<USceneComponent>("SceneComp");
 	RootComponent = RootComp;
 
+	PlanetRoot = CreateDefaultSubobject<UStaticMeshComponent>("PlanetRoot");
+	PlanetRoot->SetupAttachment(RootComponent);
+
 	//creating sphere & mesh
-	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Default Mesh"));
-	const ConstructorHelpers::FObjectFinder<UStaticMesh> MeshObj(TEXT("/Engine/BasicShapes/Sphere"));
-	SphereMesh->SetupAttachment(RootComponent);
+	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>("DefaultMesh");
+	//const ConstructorHelpers::FObjectFinder<UStaticMesh> MeshObj(TEXT("/Engine/BasicShapes/Sphere"));
+	SphereMesh->SetupAttachment(PlanetRoot);
 	
 	//instancing Orbit Path
-	OrbitPath = CreateDefaultSubobject<USplineComponent>(TEXT("OrbitPath"));
+	OrbitPath = CreateDefaultSubobject<USplineComponent>("OrbitPath");
 	OrbitPath->SetupAttachment(RootComponent);
 
 	//spline comes with two points initially, we need to remove these for the system to function correctly
 	OrbitPath->RemoveSplinePoint(0, true);
 	OrbitPath->RemoveSplinePoint(0, true);
 
-	if (MeshObj.Object) {
+	/*if (MeshObj.Object) {
 		SphereMesh->SetStaticMesh(MeshObj.Object);
-	};
+	};*/
 
 	OrbitSpeed = 1000.0;
 	distance = 0.0; //for moving actor along spline
@@ -45,21 +48,6 @@ void Aphysics_applicable_planet_base::BeginPlay()
 void Aphysics_applicable_planet_base::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//distance += (DeltaTime * OrbitSpeed);
-	
-	/*FTransform transform = OrbitPath->GetTransformAtDistanceAlongSpline(distance, ESplineCoordinateSpace::Local, false);
-	FVector CurrentLocation = FVector(transform.GetLocation().X,transform.GetLocation().Y, 0);
-	FTransform move = FTransform(FRotator::ZeroRotator,CurrentLocation,FVector::OneVector);
-	float test = move.GetLocation().X;
-	GEngine->AddOnScreenDebugMessage(-1,1.0,FColor::Red,*FString::SanitizeFloat(distance));
-	SetActorRelativeTransform(move);
-	FTransform translation = GetActorTransform();
-	
-
-	if (distance >= OrbitPath->GetSplineLength())
-	{
-		distance = 0;
-	}*/
 }
 
 UStaticMeshComponent* Aphysics_applicable_planet_base::GetMesh()
@@ -69,12 +57,21 @@ UStaticMeshComponent* Aphysics_applicable_planet_base::GetMesh()
 
 bool Aphysics_applicable_planet_base::setMaterial(UMaterialInstance* surface_texture)
 {
-	UStaticMeshComponent* mesh = GetMesh();
-	mesh->SetMaterial(0, surface_texture);
-	if (mesh->GetMaterial(0) == surface_texture) {
+	SphereMesh->SetMaterial(0, surface_texture);
+	if (SphereMesh->GetMaterial(0) == surface_texture) {
 		return true;
 	}
 	return false;
+}
+float Aphysics_applicable_planet_base::GetRadiusMeters()
+{
+	FVector Scale = SphereMesh->GetComponentScale();
+	float Radius = Scale.X;
+	return Radius;
+}
+FVector Aphysics_applicable_planet_base::GetPlanetWorldLoc()
+{
+	return PlanetRoot->GetComponentLocation();
 }
 void Aphysics_applicable_planet_base::OrbitInitialForce(const float RadiusToPlanetCenter, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector)
 {
@@ -89,11 +86,18 @@ void Aphysics_applicable_planet_base::SemiImplicitEuler(const float DeltaSeconds
 {
 	for (Aphysics_applicable_planet_base* Body : Bodies)
 	{
+		if (Body == this) {
+			continue;
+		};
 		double R = GetDistanceTo(Body);
-		FVector Direction = Body->GetActorLocation() - GetActorLocation();
+		FVector Direction = Body->GetPlanetWorldLoc() - GetPlanetWorldLoc();
+		double dist = Direction.SquaredLength();
+		Direction.Normalize();
 		double mass = Body->Data.Mass * pow(10, 24);
-		FVector Force = UGeneralHelpFunctions::ForceAonB(mass, 1, Body, this) * DeltaSeconds; //  || test this to see if you need to multiply by delta seconds to get accurate timesteps
-		UPrimitiveComponent* Baseplate = GetComponentByClass<UPrimitiveComponent>();
-		Baseplate->AddImpulse(Force, NAME_None, true);
+		double Force = (mass * MyMassActual) / dist;
+		FVector ForceVect = Force * Direction;
+		//FVector Force = UGeneralHelpFunctions::ForceAonB(mass, MyMass, Body, PlanetRoot) * DeltaSeconds; //  || test this to see if you need to multiply by delta seconds to get accurate timesteps
+		
+		PlanetRoot->AddImpulse(ForceVect, NAME_None, true);
 	};
 };

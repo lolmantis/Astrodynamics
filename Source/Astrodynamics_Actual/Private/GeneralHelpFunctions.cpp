@@ -52,14 +52,14 @@ void UGeneralHelpFunctions::RotateSpringArm(const APlayerController* controller,
 	ArmWorldRotation.Pitch = ChangeY; ArmWorldRotation.Yaw = ChangeX;
 }
 
-double UGeneralHelpFunctions::KeplerThirdLaw(const float SemiMajorAxisAU, const float CentralBodyMass)
+double UGeneralHelpFunctions::KeplerThirdLaw(const float SemiMajorAxisAU, const float CentralBodyMass, const float SecondBodyMass)
 {
 	double a3 = FMath::Pow(SemiMajorAxisAU, 3);
-	if (CentralBodyMass == 1) //if we're counting in solar masses
+	if (!SecondBodyMass) //if parent is the sun
 	{
 		double P2 = a3;
 		double P = FMath::Sqrt(P2);
-		return P; 
+		return P;
 	};
 	double MKg = CentralBodyMass * pow(10, 24); //counting in kilograms
 	double a3Meters = pow((SemiMajorAxisAU * 1.496e+11),3); //counting in meters cubed
@@ -94,15 +94,15 @@ TArray<FVector> UGeneralHelpFunctions::GenerateSplineRing(float OrbitRadius, flo
 	return SplinePoints;
 }
 
-FVector UGeneralHelpFunctions::ForceAonB(const double MassA, const double MassB, const AActor* A, const AActor* B)
+FVector UGeneralHelpFunctions::ForceAonB(const double MassA, const double MassB, const FVector A, const FVector B)
 {
-	double distance = A->GetDistanceTo(B); // we count in kilometers in the world, but so long as we maintain the units everything just works:tm:
-	FVector VectDirect = A->GetActorLocation() - B->GetActorLocation();
+	FVector VectDirect = A - B;
+	double distancesqrd = VectDirect.SquaredLength();
 	// picture it as a planet (A) attracting a spacecraft (B) towards it
 	VectDirect.Normalize();
 	// returns the unit vector pointing between the two
 	
-	double force = ((MassA * MassB) / (distance * distance)) * 6.6743e-11;
+	double force = ((MassA * MassB) / (distancesqrd)) * 6.6743e-11;
 	/* note that force is directionless at this point,
 	*  quick explanation for why it's distance squared and not distance cubed given we're multiplying by radius again;
 	*  we're using the unit vector which has a |magnitude| of 1, which doesn't affect the calculation

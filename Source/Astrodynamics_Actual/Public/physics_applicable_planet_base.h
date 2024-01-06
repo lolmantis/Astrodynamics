@@ -7,6 +7,7 @@
 #include "GeneralHelpFunctions.h"
 #include "GameFramework/Actor.h"
 #include "Components/SplineComponent.h"
+#include "Components/SphereComponent.h"
 #include "LoadedValuesStruct.h"
 #include "physics_applicable_planet_base.generated.h"
 
@@ -32,25 +33,39 @@ public:
 
 	float distance;
 
+	double MyMassActual;
+
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 		FLoadedValuesStruct Data;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		UStaticMeshComponent* PlanetRoot;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		UStaticMeshComponent* SphereMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		USplineComponent* OrbitPath;
 
 	UStaticMeshComponent* GetMesh();
 
 	/** Sets sphere material*/
 	UFUNCTION(BlueprintCallable)
+	UPARAM(DisplayName="Success")
 		bool setMaterial(UMaterialInstance* texture);
+
+	UFUNCTION(BlueprintPure, category="planets | functions")
+	UPARAM(DisplayName="Planet Radius")
+		float GetRadiusMeters();
+
+	UFUNCTION(BlueprintPure, category="planets | functions")
+	UPARAM(DisplayName="World Location")
+		FVector GetPlanetWorldLoc();
 
 	UFUNCTION(BlueprintPure,category="planets | astrophysics | functions")
 		void OrbitInitialForce(const float RadiusToPlanetCenter, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector);
 
-	UFUNCTION(BlueprintCallable, category = "spacecraft | astrophysics | functions")
+	UFUNCTION(BlueprintCallable, category = "planets | astrophysics | functions")
 		void SemiImplicitEuler(const float DeltaSeconds, const TArray<Aphysics_applicable_planet_base*> Bodies);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -59,4 +74,3 @@ public:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		//float
 };
-

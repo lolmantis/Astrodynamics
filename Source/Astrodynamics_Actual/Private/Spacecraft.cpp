@@ -6,7 +6,7 @@
 // Sets default values
 ASpacecraft::ASpacecraft()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -14,6 +14,7 @@ ASpacecraft::ASpacecraft()
 void ASpacecraft::BeginPlay()
 {
 	Super::BeginPlay();
+	Baseplate = GetComponentByClass<UPrimitiveComponent>();
 	
 }
 
@@ -55,12 +56,11 @@ void ASpacecraft::BatteryPercentage(float& percent)
 	percent = BatteryCurrent / BatteryCapacity;
 }
 
-void ASpacecraft::OrbitInitialForce(const FVector RadiusToPlanetCenter, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector)
+void ASpacecraft::OrbitInitialForce(const float OrbitRadiusMeters, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector)
 	{
 	double mass = PlanetMass * pow(10, 24); //noting that radius to planet is the CENTER of the planet
 	double GM = GravityConstant * mass;
-	double radius = RadiusToPlanetCenter.Length();
-	double vel = FMath::Sqrt(GM / radius);
+	double vel = FMath::Sqrt(GM / OrbitRadiusMeters);
 	FVector directionNormalised = OrbitDirection.GetSafeNormal();
 	ForceVector = directionNormalised * vel;
 }
@@ -70,19 +70,16 @@ float ASpacecraft::StandardGravParam(const float& PrimaryMass, const float& Seco
 	return float ((GravityConstant * ((PrimaryMass * pow(10, 24)) + (SecondaryMass * pow(10, 24)))) / 1000);
 }
 
-void ASpacecraft::SemiImplicitEuler(const float DeltaSeconds, const AActor* Spacecraft, const TArray<Aphysics_applicable_planet_base*> Bodies, FVector& Force)
+void ASpacecraft::SemiImplicitEuler(const float DeltaSeconds, const TArray<Aphysics_applicable_planet_base*> Bodies, FVector& Force)
 {
-	UPrimitiveComponent* Baseplate = Spacecraft->GetComponentByClass<UPrimitiveComponent>();
 	for (Aphysics_applicable_planet_base* Body : Bodies)
 	{
 		double mass = Body->Data.Mass * pow(10, 24);
-		FVector TempForce = UGeneralHelpFunctions::ForceAonB(mass, 1, Body, Spacecraft) * DeltaSeconds; //  || test this to see if you need to multiply by delta seconds to get accurate timesteps
+		FVector PlanetLoc = Body->GetPlanetWorldLoc();
+		FVector TempForce = UGeneralHelpFunctions::ForceAonB(mass, 1, PlanetLoc, GetActorLocation()) * DeltaSeconds; //  scales force to the timestep (m/s**2 to m/s)
 		Baseplate->AddImpulse(TempForce, NAME_None, true);
 		Force += TempForce;
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Magenta, TempForce.ToString());
-		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, Force.ToString());
 	};
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Cyan, Force.ToString());
 }
 
 void ASpacecraft::RocketEquation(const float& SpecificImpulse,const float& InitialMass,const float& FinalMass, float& Velocity)
@@ -188,4 +185,17 @@ void ASpacecraft::HohmannMoreEfficient(const float InitialOrbitRadius, const flo
 	BiEllipticPreference = Apoapsis / InitialOrbitRadius;
 
 	//return false;
+}
+
+/*This only exists because I didn't want to have to build a function in blueprint to get all the craft component arrays, this means I can get the array quickly
+and the blueprint just has to handle the mass part with a switch statement, a win win in my books*/
+TArray<FName> ASpacecraft::ArrayAllComponents(FName NHull, TArray<FName> NThrusters, TArray<FName> NReactors, TArray<FName> NReactionWheels, TArray<FName> NGyroscopes)
+{
+	TArray<FName> Array;
+	Array.Add(NHull);
+	Array.Append(NReactors);
+	Array.Append(NThrusters); // reverse this to be the order you want them displayed
+	Array.Append(NReactionWheels);
+	Array.Append(NGyroscopes);
+	return Array;
 };
