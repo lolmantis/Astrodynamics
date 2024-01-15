@@ -24,7 +24,6 @@ protected:
 
 	UPrimitiveComponent* Baseplate;
 
-	UPROPERTY(BlueprintReadOnly, category = "spacecraft | astrophysics | variables")
 	float GravityConstant = 6.6743e-11f;
 
 	UFUNCTION(BlueprintCallable, category = "spacecraft | functions")

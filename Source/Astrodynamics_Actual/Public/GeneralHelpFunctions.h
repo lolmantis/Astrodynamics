@@ -46,15 +46,11 @@ public:
 
 	/*returns the period of a given orbit in years as standard, you'll have to convert to days later down the line if needed*/
 	UFUNCTION(BlueprintCallable, BlueprintPure, category="astrophysics|functions")
-	static double KeplerThirdLaw(const float SemiMajorAxisAU, const float CentralBodyMass, const float SecondBodyMass);
+	static UPARAM(DisplayName = "period (years)") double KeplerThirdLaw(const float SemiMajorAxisM, const float CentralBodyMass, const float SecondBodyMass, const bool bIsParentSun);
 
 	UFUNCTION(BlueprintPure,category="macros|functions")
 	static TArray<FVector> GenerateSplineRing(float OrbitRadius, float OrbitTilt, float OrbitEllipse, int Complexity);
 
 	UFUNCTION(BlueprintPure,category="astrophysics|functions")
 	static FVector ForceAonB(const double MassPrimary, const double MassSecondary, const FVector Primary, const FVector Secondary);
-
-	/*quick sorting of TArray<physics_applicable_planet_base> for binary searching, notably in mission level*/
-	//UFUNCTION(BlueprintCallable, BlueprintPure, category = "macros|functions")
-	//static void SortArray(TArray* Array);
 };

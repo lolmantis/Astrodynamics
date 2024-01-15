@@ -28,13 +28,13 @@ struct ASTRODYNAMICS_ACTUAL_API FLoadedValuesStruct
 		float Mass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float ERelMass;
+		float Period;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		int32 Radius;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float ERelRadius;
+		float Tilt;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FVector WorldPos;
@@ -54,11 +54,11 @@ struct ASTRODYNAMICS_ACTUAL_API FLoadedValuesStruct
 		WorldPos = FVector::ZeroVector;
 		Name = FText::FromString("NULL");
 		BodyType = FText::FromString("NULL");
-		SurfaceTexture = NULL;
+		SurfaceTexture = nullptr;
 		Mass = 0.0;
-		ERelMass = 0.0;
+		Period = 0.0;
 		Radius = 1;
-		ERelRadius = 1.0;
+		Tilt= 0.0;
 		SplineMap;
 		CentralStar = 0;
 		bIsMoon = false;

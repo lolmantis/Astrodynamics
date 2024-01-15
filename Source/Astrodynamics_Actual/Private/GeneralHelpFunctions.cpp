@@ -52,18 +52,19 @@ void UGeneralHelpFunctions::RotateSpringArm(const APlayerController* controller,
 	ArmWorldRotation.Pitch = ChangeY; ArmWorldRotation.Yaw = ChangeX;
 }
 
-double UGeneralHelpFunctions::KeplerThirdLaw(const float SemiMajorAxisAU, const float CentralBodyMass, const float SecondBodyMass)
+double UGeneralHelpFunctions::KeplerThirdLaw(const float SemiMajorAxisM, const float CentralBodyMass, const float SecondBodyMass, const bool bIsParentSun)
 {
-	double a3 = FMath::Pow(SemiMajorAxisAU, 3);
-	if (!SecondBodyMass) //if parent is the sun
+	if (bIsParentSun)
 	{
-		double P2 = a3;
-		double P = FMath::Sqrt(P2);
+		double a3 = FMath::Pow((SemiMajorAxisM / 1.496e+11), 3);
+		double P = FMath::Sqrt(a3); // P2=A3
 		return P;
 	};
-	double MKg = CentralBodyMass * pow(10, 24); //counting in kilograms
-	double a3Meters = pow((SemiMajorAxisAU * 1.496e+11),3); //counting in meters cubed
-	double GM = 6.6743e-11 * MKg;
+	double CentralMKg = CentralBodyMass * pow(10, 24); //counting in kilograms
+	double SecondMKg = SecondBodyMass * pow(10, 24);
+	double a3Meters = pow((SemiMajorAxisM),3); //counting in meters cubed
+	double TotalMass = CentralMKg + SecondMKg;
+	double GM = 6.6743e-11 * (CentralMKg+SecondMKg);
 	double K = (4.0f * PI * PI) / GM;
 	double P2 = K * a3Meters;
 	double PSec =  FMath::Sqrt(P2); // seconds

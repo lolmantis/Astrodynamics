@@ -9,6 +9,7 @@
 #include "Components/SplineComponent.h"
 #include "Components/SphereComponent.h"
 #include "LoadedValuesStruct.h"
+#include "MoonPathPair.h"
 #include "physics_applicable_planet_base.generated.h"
 
 UCLASS(Blueprintable)
@@ -33,21 +34,26 @@ public:
 
 	float distance;
 
-	double MyMassActual;
-
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-		FLoadedValuesStruct Data;
+	FLoadedValuesStruct Data;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-		UStaticMeshComponent* PlanetRoot;
+	UStaticMeshComponent* PlanetRoot;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-		UStaticMeshComponent* SphereMesh;
+	UStaticMeshComponent* SphereMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-		USplineComponent* OrbitPath;
+	USplineComponent* OrbitPath;
 
-	UStaticMeshComponent* GetMesh();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<Aphysics_applicable_planet_base*> Moons;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<FMoonPathPair> MoonPaths;
+
+
+	UStaticMeshComponent* GetMesh() const;
 
 	/** Sets sphere material*/
 	UFUNCTION(BlueprintCallable)
@@ -56,11 +62,19 @@ public:
 
 	UFUNCTION(BlueprintPure, category="planets | functions")
 	UPARAM(DisplayName="Planet Radius")
-		float GetRadiusMeters();
+		float GetRadiusMeters() const;
 
 	UFUNCTION(BlueprintPure, category="planets | functions")
 	UPARAM(DisplayName="World Location")
-		FVector GetPlanetWorldLoc();
+		FVector GetPlanetWorldLoc() const;
+
+	UFUNCTION(BlueprintPure, category="planets | astrophysics | functions")
+	UPARAM(DisplayName="Force Vector")
+		FVector GetPlanetWorldVel() const;
+
+	UFUNCTION(BlueprintCallable, category="planets | astrophysics | functions")
+	UPARAM(DisplayName = "Rad/sec")
+		FVector SetAngularRotation(float Period);
 
 	UFUNCTION(BlueprintPure,category="planets | astrophysics | functions")
 		void OrbitInitialForce(const float RadiusToPlanetCenter, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector);
@@ -70,6 +84,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float OrbitSpeed;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, category = "planets | astrophysics | variables")
+		float PeriodYears;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		//float

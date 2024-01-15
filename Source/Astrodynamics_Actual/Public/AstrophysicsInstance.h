@@ -16,4 +16,7 @@ class ASTRODYNAMICS_ACTUAL_API UAstrophysicsInstance : public UGameInstance
 
 public:
 	virtual void Init() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, category = "astrophysics | variables")
+	float GravityConstant = 6.6743e-11f;
 };
