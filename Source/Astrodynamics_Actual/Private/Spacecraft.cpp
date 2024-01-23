@@ -187,6 +187,16 @@ void ASpacecraft::HohmannMoreEfficient(const float InitialOrbitRadius, const flo
 	//return false;
 }
 
+float ASpacecraft::TransferSemiMajorAxis(const float InitialOrbitRadius, const float FinalOrbitRadius)
+{
+	return (InitialOrbitRadius+FinalOrbitRadius)/2;
+}
+
+FVector ASpacecraft::InterceptPosition(const FVector InitialPosition, const FVector TargetBodyLocation, const FVector TargetOrbitRadius)
+{
+	return (TargetBodyLocation + TargetOrbitRadius) - InitialPosition;
+}
+
 /*This only exists because I didn't want to have to build a function in blueprint to get all the craft component arrays, this means I can get the array quickly
 and the blueprint just has to handle the mass part with a switch statement, a win win in my books*/
 TArray<FName> ASpacecraft::ArrayAllComponents(FName NHull, TArray<FName> NThrusters, TArray<FName> NReactors, TArray<FName> NReactionWheels, TArray<FName> NGyroscopes)

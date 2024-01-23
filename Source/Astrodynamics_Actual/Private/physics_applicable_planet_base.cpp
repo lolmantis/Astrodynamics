@@ -25,6 +25,9 @@ Aphysics_applicable_planet_base::Aphysics_applicable_planet_base()
 	OrbitPath = CreateDefaultSubobject<USplineComponent>("OrbitPath");
 	OrbitPath->SetupAttachment(RootComponent);
 
+	Stabiliser = CreateDefaultSubobject<USpringArmComponent>("Stabiliser");
+	Stabiliser->SetupAttachment(PlanetRoot);
+
 	//spline comes with two points initially, we need to remove these for the system to function correctly
 	OrbitPath->RemoveSplinePoint(0, true);
 	OrbitPath->RemoveSplinePoint(0, true);
@@ -45,7 +48,7 @@ void Aphysics_applicable_planet_base::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-UStaticMeshComponent* Aphysics_applicable_planet_base::GetMesh() const
+UStaticMeshComponent* Aphysics_applicable_planet_base::GetPlanet() const
 {
 	return SphereMesh;
 }
@@ -61,8 +64,7 @@ bool Aphysics_applicable_planet_base::setMaterial(UMaterialInstance* surface_tex
 float Aphysics_applicable_planet_base::GetRadiusMeters() const
 {
 	FVector Scale = SphereMesh->GetComponentScale();
-	float Radius = Scale.X;
-	return Radius;
+	return Scale.X; // radius = scale in direction
 }
 FVector Aphysics_applicable_planet_base::GetPlanetWorldLoc() const
 {
@@ -71,17 +73,16 @@ FVector Aphysics_applicable_planet_base::GetPlanetWorldLoc() const
 
 FVector Aphysics_applicable_planet_base::GetPlanetWorldVel() const
 {
-	return SphereMesh->GetComponentVelocity();
+	return PlanetRoot->GetComponentVelocity();
 }
 
-FVector Aphysics_applicable_planet_base::SetAngularRotation(float Period)
+FRotator Aphysics_applicable_planet_base::GetAngularRotation(float Period)
 {
 	double time = Period * 3600;
 	double Radians = 2 * PI;
-	FVector force (0,0,0);
-	force.Y = Radians/time;
-	SphereMesh->AddAngularImpulseInRadians(force,NAME_None,true); 
-	return SphereMesh->GetPhysicsAngularVelocityInRadians();
+	FRotator force (0,0,0);
+	force.Roll = Radians/time;
+	return force;
 }
 
 void Aphysics_applicable_planet_base::OrbitInitialForce(const float RadiusToPlanetCenter, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector)

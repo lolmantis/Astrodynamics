@@ -27,19 +27,19 @@ protected:
 	float GravityConstant = 6.6743e-11f;
 
 	UFUNCTION(BlueprintCallable, category = "spacecraft | functions")
-	void Initialiser(
-		const FString& IN_Name,
-		const float& IN_FuelCapacity,
-		const float& IN_BatteryCapacity,
-		const float& IN_DryMass,
-		const float& IN_WetMass,
-		const int32& IN_crew,
-		const FName& IN_hull,
-		const TArray<FName>& IN_Thrusters,
-		const TArray<FName>& IN_Reactors,
-		const TArray<FName>& IN_ReactionWheels,
-		const TArray<FName>& IN_gyros
-	);
+		void Initialiser(
+			const FString& IN_Name,
+			const float& IN_FuelCapacity,
+			const float& IN_BatteryCapacity,
+			const float& IN_DryMass,
+			const float& IN_WetMass,
+			const int32& IN_crew,
+			const FName& IN_hull,
+			const TArray<FName>& IN_Thrusters,
+			const TArray<FName>& IN_Reactors,
+			const TArray<FName>& IN_ReactionWheels,
+			const TArray<FName>& IN_gyros
+		);
 
 	UFUNCTION(BlueprintPure, category = "spacecraft | functions")
 		void FuelPercentage(float& percent);
@@ -102,6 +102,13 @@ public:
 		void HohmannMoreEfficient(const float InitialOrbitRadius, const float FinalOrbitRadius, const float Apoapsis,
 			bool& bHohmannEfficient, float& BiEllipticPreference);
 
+	UFUNCTION(BlueprintCallable, category = "spacecraft | astrophysics | functions")
+	UPARAM(DisplayName = "Transfer Semi Major Axis")
+		float TransferSemiMajorAxis(const float InitialOrbitRadius, const float FinalOrbitRadius);
+
+	UFUNCTION(BlueprintPure, category = "spacecraft | astrophysics | functions")
+	UPARAM(DisplayName="Destination Worldspace Position")
+		FVector InterceptPosition(const FVector InitialPosition, const FVector TargetBodyLocation, const FVector TargetOrbitRadius);
 
 	UFUNCTION(BlueprintPure, category = "spacecraft | functions")
 	UPARAM(DisplayName="All components")

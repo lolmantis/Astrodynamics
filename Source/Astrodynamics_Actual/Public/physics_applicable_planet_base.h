@@ -8,6 +8,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/SplineComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "LoadedValuesStruct.h"
 #include "MoonPathPair.h"
 #include "physics_applicable_planet_base.generated.h"
@@ -46,14 +47,14 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	USplineComponent* OrbitPath;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USpringArmComponent* Stabiliser;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TArray<Aphysics_applicable_planet_base*> Moons;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<FMoonPathPair> MoonPaths;
 
-
-	UStaticMeshComponent* GetMesh() const;
+	UStaticMeshComponent* GetPlanet() const;
 
 	/** Sets sphere material*/
 	UFUNCTION(BlueprintCallable)
@@ -72,9 +73,10 @@ public:
 	UPARAM(DisplayName="Force Vector")
 		FVector GetPlanetWorldVel() const;
 
+	/** Gets angular velocity of planet, takes period in hours*/
 	UFUNCTION(BlueprintCallable, category="planets | astrophysics | functions")
 	UPARAM(DisplayName = "Rad/sec")
-		FVector SetAngularRotation(float Period);
+		FRotator GetAngularRotation(float Period);
 
 	UFUNCTION(BlueprintPure,category="planets | astrophysics | functions")
 		void OrbitInitialForce(const float RadiusToPlanetCenter, const FVector OrbitDirection, const float PlanetMass, FVector& ForceVector);
@@ -87,7 +89,4 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, category = "planets | astrophysics | variables")
 		float PeriodYears;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		//float
 };
